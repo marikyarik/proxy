@@ -9,15 +9,21 @@ import (
 
 const database = "database/db.json"
 
+type User struct {
+	Id      string            `json:"id"`
+	Active  bool              `json:"active"`
+	Headers map[string]string `json:"headers"`
+}
+
 type StorageManager struct {
-	ProxyUrl  string                 `json:"proxy_url"`
-	Users     map[string]interface{} `json:"users"`
+	ProxyUrl string `json:"proxy_url"`
+	Users    []User `json:"users"`
 }
 
 func NewStorageManager() *StorageManager {
 
 	storageManager := StorageManager{}
-	
+
 	file, _ := ioutil.ReadFile(database)
 
 	_ = json.Unmarshal([]byte(file), &storageManager)
@@ -36,36 +42,48 @@ func (s *StorageManager) Save() {
 	_ = ioutil.WriteFile(database, file, 0666)
 }
 
-func (s *StorageManager) GetActiveUser() string {
-	for _, v := range s.Users {
-		u := v.(map[string]interface{})
-		if u["active"].(bool) {
-			jsonUser, err := json.Marshal(u)
-			if err != nil {
-				return ""
-			}
-
-			return string(jsonUser)
+func (s *StorageManager) GetActiveUser() map[string]string {
+	for _, u := range s.Users {
+		if u.Active {
+			return u.Headers
 		}
 	}
-	return ""
+	return make(map[string]string)
 }
 
-func (s *StorageManager) AddUser(user interface{}) string {
-	hash := randstr.String(20)
+func (s *StorageManager) AddUser(user User) string {
+	id := randstr.String(20)
 
-	s.Users[hash] = user
-
+	user.Id = id;
+	user.Active = false;
+	s.Users = append(s.Users, user)
 	s.Save()
-	return hash
+	return id
 }
 
-func (s *StorageManager) EditUser(hash string, user interface{}) {
-	s.Users[hash] = user
+func (s *StorageManager) EditUser(id string, user User) {
+	for i, v := range s.Users {
+        if v.Id == id {
+            s.Users[i] = user
+        }
+    }
 	s.Save()
 }
 
-func (s *StorageManager) DeleteUser(hash string) {
-	delete(s.Users, hash)
+func (s *StorageManager) ActivateUser(id string) {
+	for i, v := range s.Users {
+        if v.Id == id {
+            s.Users[i].Active = !s.Users[i].Active
+        }
+    }
+	s.Save()
+}
+
+func (s *StorageManager) DeleteUser(id string) {
+	for i, v := range s.Users {
+        if v.Id == id {
+            s.Users = append(s.Users[:i], s.Users[i+1:]...)
+        }
+    }
 	s.Save()
 }

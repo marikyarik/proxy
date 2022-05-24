@@ -153,13 +153,7 @@
             [...document.getElementsByClassName('activate')].map(item => {
                 item.onclick = function () {
                     var id = this.closest('.collapse-parent').getAttribute('data-id');
-                    app.users[id].active = !app.users[id].active;
-                    const json = JSON.stringify(app.users[id])
-                    if (!app.isValidJson(json)) {
-                        alert('Not valid JSON');
-                    } else {
-                        app.editUser(id, json);
-                    }
+                    app.activateUser(id);
                 }
             });
 
@@ -179,15 +173,15 @@
             for (const key in app.users) {
                 const active = app.users[key].active ? 'Active' : 'Not active';
                 const className = app.users[key].active ? '' : 'disabled';
-                html += `<div class="box collapse-parent" data-id="` + key + `">
+                html += `<div class="box collapse-parent" data-id="` + app.users[key]['id'] + `">
                             <div class="box-header">
-                                <h3 class="box-title">` + app.users[key].name + `</h3>
+                                <h3 class="box-title">` + app.users[key]['headers']['X-User-Username'] + `</h3>
                                 <button class="btn activate ` + className + `">` + active + `</button>
                                 <button class="btn collapse">Edit</button>
                                 <button class="btn delete">Delete</button>
                             </div>
                             <div class="box-content collapse-body" style="display: none">
-                                <textarea>` + JSON.stringify(app.users[key]) + `</textarea>
+                                <textarea>` + JSON.stringify(app.users[key]['headers']) + `</textarea>
                                 <button class="btn edit">Save</button>
                             </div>
                         </div>`;
@@ -206,8 +200,8 @@
         },
         isValidJson: function  (str) {
             try {
-                const u = JSON.parse(str);
-                if (u.name == undefined || u.active == undefined) {
+                const h = JSON.parse(str);
+                if (h['X-User-Username'] == undefined ) {
                     return false;
                 }
             } catch (e) {
@@ -239,6 +233,13 @@
         deleteUser: async function (id) {
             try {
                 await app.request("DELETE", app.userUrl + "/" + id);
+            } catch (error) {
+                console.log(error.message);
+            }
+        },
+        activateUser: async function (id) {
+            try {
+                await app.request("PATCH", app.userUrl + "/" + id);
             } catch (error) {
                 console.log(error.message);
             }

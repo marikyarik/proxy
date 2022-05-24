@@ -175,13 +175,7 @@ func StreamDashboard(qw422016 *qt422016.Writer, data []byte) {
             [...document.getElementsByClassName('activate')].map(item => {
                 item.onclick = function () {
                     var id = this.closest('.collapse-parent').getAttribute('data-id');
-                    app.users[id].active = !app.users[id].active;
-                    const json = JSON.stringify(app.users[id])
-                    if (!app.isValidJson(json)) {
-                        alert('Not valid JSON');
-                    } else {
-                        app.editUser(id, json);
-                    }
+                    app.activateUser(id);
                 }
             });
 
@@ -209,7 +203,7 @@ func StreamDashboard(qw422016 *qt422016.Writer, data []byte) {
 //line templates/dashboard.qtpl:1
 	qw422016.N().S("`")
 //line templates/dashboard.qtpl:1
-	qw422016.N().S(` + key + `)
+	qw422016.N().S(` + app.users[key]['id'] + `)
 //line templates/dashboard.qtpl:1
 	qw422016.N().S("`")
 //line templates/dashboard.qtpl:1
@@ -219,7 +213,7 @@ func StreamDashboard(qw422016 *qt422016.Writer, data []byte) {
 //line templates/dashboard.qtpl:1
 	qw422016.N().S("`")
 //line templates/dashboard.qtpl:1
-	qw422016.N().S(` + app.users[key].name + `)
+	qw422016.N().S(` + app.users[key]['headers']['X-User-Username'] + `)
 //line templates/dashboard.qtpl:1
 	qw422016.N().S("`")
 //line templates/dashboard.qtpl:1
@@ -249,7 +243,7 @@ func StreamDashboard(qw422016 *qt422016.Writer, data []byte) {
 //line templates/dashboard.qtpl:1
 	qw422016.N().S("`")
 //line templates/dashboard.qtpl:1
-	qw422016.N().S(` + JSON.stringify(app.users[key]) + `)
+	qw422016.N().S(` + JSON.stringify(app.users[key]['headers']) + `)
 //line templates/dashboard.qtpl:1
 	qw422016.N().S("`")
 //line templates/dashboard.qtpl:1
@@ -276,8 +270,8 @@ func StreamDashboard(qw422016 *qt422016.Writer, data []byte) {
         },
         isValidJson: function  (str) {
             try {
-                const u = JSON.parse(str);
-                if (u.name == undefined || u.active == undefined) {
+                const h = JSON.parse(str);
+                if (h['X-User-Username'] == undefined ) {
                     return false;
                 }
             } catch (e) {
@@ -313,6 +307,13 @@ func StreamDashboard(qw422016 *qt422016.Writer, data []byte) {
                 console.log(error.message);
             }
         },
+        activateUser: async function (id) {
+            try {
+                await app.request("PATCH", app.userUrl + "/" + id);
+            } catch (error) {
+                console.log(error.message);
+            }
+        },
         request: async function (method, url, data) {
             const fetchOptions = {
                 method: method,
@@ -336,39 +337,39 @@ func StreamDashboard(qw422016 *qt422016.Writer, data []byte) {
         }
     }
     app.init(`)
-//line templates/dashboard.qtpl:268
+//line templates/dashboard.qtpl:269
 	qw422016.N().Z(data)
-//line templates/dashboard.qtpl:268
+//line templates/dashboard.qtpl:269
 	qw422016.N().S(`);
 </script>
 </body>
 </html>
 `)
-//line templates/dashboard.qtpl:272
+//line templates/dashboard.qtpl:273
 }
 
-//line templates/dashboard.qtpl:272
+//line templates/dashboard.qtpl:273
 func WriteDashboard(qq422016 qtio422016.Writer, data []byte) {
-//line templates/dashboard.qtpl:272
+//line templates/dashboard.qtpl:273
 	qw422016 := qt422016.AcquireWriter(qq422016)
-//line templates/dashboard.qtpl:272
+//line templates/dashboard.qtpl:273
 	StreamDashboard(qw422016, data)
-//line templates/dashboard.qtpl:272
+//line templates/dashboard.qtpl:273
 	qt422016.ReleaseWriter(qw422016)
-//line templates/dashboard.qtpl:272
+//line templates/dashboard.qtpl:273
 }
 
-//line templates/dashboard.qtpl:272
+//line templates/dashboard.qtpl:273
 func Dashboard(data []byte) string {
-//line templates/dashboard.qtpl:272
+//line templates/dashboard.qtpl:273
 	qb422016 := qt422016.AcquireByteBuffer()
-//line templates/dashboard.qtpl:272
+//line templates/dashboard.qtpl:273
 	WriteDashboard(qb422016, data)
-//line templates/dashboard.qtpl:272
+//line templates/dashboard.qtpl:273
 	qs422016 := string(qb422016.B)
-//line templates/dashboard.qtpl:272
+//line templates/dashboard.qtpl:273
 	qt422016.ReleaseByteBuffer(qb422016)
-//line templates/dashboard.qtpl:272
+//line templates/dashboard.qtpl:273
 	return qs422016
-//line templates/dashboard.qtpl:272
+//line templates/dashboard.qtpl:273
 }

@@ -1,5 +1,6 @@
-//go:generate qtc -dir=templates
 package main
+
+//go:generate qtc -dir=templates
 
 import (
 	"api/controllers"
@@ -27,8 +28,9 @@ func main() {
 	r.GET("/proxy-ui/", w.Dashboard)
 	r.POST("/proxy-ui/config", w.SetConfig)
 	r.POST("/proxy-ui/user", w.AddUser)
-	r.POST("/proxy-ui/user/{hash}", w.EditUser)
-	r.DELETE("/proxy-ui/user/{hash}", w.DeleteUser)
+	r.POST("/proxy-ui/user/{id}", w.EditUser)
+	r.DELETE("/proxy-ui/user/{id}", w.DeleteUser)
+	r.PATCH("/proxy-ui/user/{id}", w.ActivateUser)
 	r.ANY("/{path:*}", p.Proxy)
 
 	r.PanicHandler  = func (ctx *fasthttp.RequestCtx, data interface{})  {

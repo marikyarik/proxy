@@ -1,17 +1,18 @@
 # syntax=docker/dockerfile:1
 
-FROM golang:1.18-alpine
+FROM golang:latest
 
 WORKDIR /app
 
-COPY go.mod ./
-COPY go.sum ./
-RUN go mod download
+COPY go.mod go.sum ./
+RUN go mod download && go mod verify
 
-COPY *.go ./
+COPY . ./
+
+RUN go install github.com/valyala/quicktemplate/qtc
 
 RUN qtc && go build -o /proxy
 
 EXPOSE 80
 
-CMD [ "/docker-proxy" ]
+CMD [ "/proxy" ]

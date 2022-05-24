@@ -45,17 +45,17 @@ func (w *WebController) SetConfig(ctx *fasthttp.RequestCtx) {
 func (w *WebController) AddUser(ctx *fasthttp.RequestCtx) {
 	ctx.Response.Header.SetContentType("application/json")
 
-	var user interface{}
+	var user storage.User
 
-	if err := json.Unmarshal(ctx.Request.Body(), &user); err != nil {
+	if err := json.Unmarshal(ctx.Request.Body(), &user.Headers); err != nil {
 		jsonBody, _ := json.Marshal(map[string]string{"error": "Form error"})
 		ctx.SetStatusCode(fasthttp.StatusBadRequest)
 		ctx.SetBody(jsonBody)
 		return
 	}
 
-	hash := w.storageManager.AddUser(user)
-	jsonresonse, _ := json.Marshal(map[string]string{"hash": hash})
+	id := w.storageManager.AddUser(user)
+	jsonresonse, _ := json.Marshal(map[string]string{"id": id})
 	ctx.SetStatusCode(fasthttp.StatusOK)
 	ctx.SetBody(jsonresonse)
 }
@@ -63,22 +63,29 @@ func (w *WebController) AddUser(ctx *fasthttp.RequestCtx) {
 func (w *WebController) EditUser(ctx *fasthttp.RequestCtx) {
 	ctx.Response.Header.SetContentType("application/json")
 
-	var user interface{}
+	var user storage.User
 
-	if err := json.Unmarshal(ctx.Request.Body(), &user); err != nil {
+	if err := json.Unmarshal(ctx.Request.Body(), &user.Headers); err != nil {
 		jsonBody, _ := json.Marshal(map[string]string{"error": "Form error"})
 		ctx.SetStatusCode(fasthttp.StatusBadRequest)
 		ctx.SetBody(jsonBody)
 		return
 	}
 
-	hash := ctx.UserValue("hash").(string)
-	w.storageManager.EditUser(hash, user)
+	id := ctx.UserValue("id").(string)
+	user.Id = id
+	w.storageManager.EditUser(id, user)
 	ctx.SetStatusCode(fasthttp.StatusOK)
 }
 
 func (w *WebController) DeleteUser(ctx *fasthttp.RequestCtx) {
-	hash := ctx.UserValue("hash").(string)
-	w.storageManager.DeleteUser(hash)
+	id := ctx.UserValue("id").(string)
+	w.storageManager.DeleteUser(id)
+	ctx.SetStatusCode(fasthttp.StatusOK)
+}
+
+func (w *WebController) ActivateUser(ctx *fasthttp.RequestCtx) {
+	id := ctx.UserValue("id").(string)
+	w.storageManager.ActivateUser(id)
 	ctx.SetStatusCode(fasthttp.StatusOK)
 }

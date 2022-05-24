@@ -1,9 +1,18 @@
 {
  "proxy_url": "127.0.0.1:8000",
- "users": {
-  "UhZTFo0HuWvQg8Q0RXHh": {
+ "users": [
+  {
+   "id": "UhZTFo0HuWvQg8Q0RXHh",
    "active": true,
-   "name": "Valera1"
+   "headers": {
+    "X-User-Affiliate": "test",
+    "X-User-Email": "test@rakuten.com",
+    "X-User-Groups": "test",
+    "X-User-Legacy": "test-legacy-value",
+    "X-User-Sid": "1",
+    "X-User-Sub": "1",
+    "X-User-Username": "test"
+   }
   }
- }
+ ]
 }
