@@ -16,8 +16,8 @@ type User struct {
 }
 
 type StorageManager struct {
-	ProxyUrl string `json:"proxy_url"`
-	Users    []User `json:"users"`
+	Routes   map[string]string `json:"routes"`
+	Users    []User            `json:"users"`
 }
 
 func NewStorageManager() *StorageManager {
@@ -31,7 +31,7 @@ func NewStorageManager() *StorageManager {
 	return &storageManager
 }
 
-func (s *StorageManager) Save() {
+func (s *StorageManager) save() {
 
 	file, err := json.MarshalIndent(s, "", " ")
 
@@ -40,6 +40,14 @@ func (s *StorageManager) Save() {
 	}
 
 	_ = ioutil.WriteFile(database, file, 0666)
+}
+
+func (s *StorageManager) GetProxyUrl(host string) string {
+	if r, ok := s.Routes[host]; ok {
+		return r
+	}
+
+	return ""
 }
 
 func (s *StorageManager) GetActiveUser() map[string]string {
@@ -51,39 +59,56 @@ func (s *StorageManager) GetActiveUser() map[string]string {
 	return make(map[string]string)
 }
 
-func (s *StorageManager) AddUser(user User) string {
-	id := randstr.String(20)
-
-	user.Id = id;
-	user.Active = false;
-	s.Users = append(s.Users, user)
-	s.Save()
-	return id
+func (s *StorageManager) SetConfig(routes map[string]string) {
+	s.Routes = routes
+	s.save()
 }
 
-func (s *StorageManager) EditUser(id string, user User) {
+func (s *StorageManager) AddUser(user User) User {
+	id := randstr.String(20)
+
+	user.Id = id
+	user.Active = false
+	s.Users = append(s.Users, user)
+	s.save()
+	return user
+}
+
+func (s *StorageManager) EditUser(id string, user User) User {
+	var u User
 	for i, v := range s.Users {
-        if v.Id == id {
-            s.Users[i] = user
-        }
-    }
-	s.Save()
+		if v.Id == id {
+			s.Users[i].Headers = user.Headers
+			u = s.Users[i]
+		}
+	}
+	s.save()
+	return u
 }
 
 func (s *StorageManager) ActivateUser(id string) {
+	activated := false
 	for i, v := range s.Users {
-        if v.Id == id {
-            s.Users[i].Active = !s.Users[i].Active
-        }
-    }
-	s.Save()
+		if v.Id == id {
+			activated = !s.Users[i].Active
+			s.Users[i].Active = activated
+		} 
+	}
+	if activated {
+		for i, v := range s.Users {
+			if v.Id != id {
+				s.Users[i].Active = false
+			} 
+		}
+	}
+	s.save()
 }
 
 func (s *StorageManager) DeleteUser(id string) {
 	for i, v := range s.Users {
-        if v.Id == id {
-            s.Users = append(s.Users[:i], s.Users[i+1:]...)
-        }
-    }
-	s.Save()
+		if v.Id == id {
+			s.Users = append(s.Users[:i], s.Users[i+1:]...)
+		}
+	}
+	s.save()
 }

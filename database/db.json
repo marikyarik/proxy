@@ -1,12 +1,14 @@
 {
- "proxy_url": "127.0.0.1:8000",
+ "routes": {
+  "localhost": "127.0.0.1:8000"
+ },
  "users": [
   {
-   "id": "UhZTFo0HuWvQg8Q0RXHh",
+   "id": "76UlQ5mdPPlbEIrLOZNA",
    "active": true,
    "headers": {
     "X-User-Affiliate": "test",
-    "X-User-Email": "test@rakuten.com",
+    "X-User-Email": "test@raakuten.com",
     "X-User-Groups": "test",
     "X-User-Legacy": "test-legacy-value",
     "X-User-Sid": "1",

@@ -31,14 +31,15 @@ func (w *WebController) Dashboard(ctx *fasthttp.RequestCtx) {
 func (w *WebController) SetConfig(ctx *fasthttp.RequestCtx) {
 	ctx.Response.Header.SetContentType("application/json")
 
-	if err := json.Unmarshal(ctx.Request.Body(), &w.storageManager); err != nil {
+	var routes map[string]string
+	if err := json.Unmarshal(ctx.Request.Body(), &routes); err != nil {
 		jsonBody, _ := json.Marshal(map[string]string{"error": "Form error"})
 		ctx.SetStatusCode(fasthttp.StatusBadRequest)
 		ctx.SetBody(jsonBody)
 		return
 	}
 
-	w.storageManager.Save()
+	w.storageManager.SetConfig(routes)
 	ctx.SetStatusCode(fasthttp.StatusOK)
 }
 
@@ -54,8 +55,8 @@ func (w *WebController) AddUser(ctx *fasthttp.RequestCtx) {
 		return
 	}
 
-	id := w.storageManager.AddUser(user)
-	jsonresonse, _ := json.Marshal(map[string]string{"id": id})
+	u := w.storageManager.AddUser(user)
+	jsonresonse, _ := json.Marshal(u)
 	ctx.SetStatusCode(fasthttp.StatusOK)
 	ctx.SetBody(jsonresonse)
 }
@@ -73,9 +74,10 @@ func (w *WebController) EditUser(ctx *fasthttp.RequestCtx) {
 	}
 
 	id := ctx.UserValue("id").(string)
-	user.Id = id
-	w.storageManager.EditUser(id, user)
+	u := w.storageManager.EditUser(id, user)
+	jsonresonse, _ := json.Marshal(u)
 	ctx.SetStatusCode(fasthttp.StatusOK)
+	ctx.SetBody(jsonresonse)
 }
 
 func (w *WebController) DeleteUser(ctx *fasthttp.RequestCtx) {

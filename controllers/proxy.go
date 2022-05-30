@@ -16,7 +16,8 @@ func NewProxyController(storageManager *storage.StorageManager) *ProxyController
 }
 
 func (p *ProxyController) Proxy(ctx *fasthttp.RequestCtx) {
-	ctx.Request.SetHost(p.storageManager.ProxyUrl)
+	hostHeader := string(ctx.Request.Header.Peek("Host"))
+	ctx.Request.SetHost(p.storageManager.GetProxyUrl(hostHeader))
 	for key, value := range p.storageManager.GetActiveUser() {
 		ctx.Request.Header.Set(key, value)
 	  } 
