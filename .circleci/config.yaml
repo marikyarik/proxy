@@ -1,0 +1,40 @@
+version: 2.1
+
+orbs:
+  gcp-cli: circleci/gcp-cli@1.8.3
+
+executors:
+  default:
+    docker:
+      - image: google/cloud-sdk
+    working_directory: /app
+
+# Define the jobs we want to run for this project
+jobs:
+  build:
+    executor:
+      name: default
+    steps:
+      - checkout
+      - setup_remote_docker:
+          version: 18.06.0-ce
+      - gcp-cli/initialize
+      - gcp-cli/install
+      - run:
+          name: Push image to GCR
+          command: |
+            gcloud --quiet auth configure-docker
+            
+            docker build -t proxy .
+            today=$(date "+%Y%m%d%H%M%S")
+            TAG=gcr.io/api-circleci-test/proxy:${today}
+            docker tag proxy $TAG
+            docker push $TAG
+            LATEST_TAG=gcr.io/api-circleci-test/proxy:latest
+            docker tag proxy $LATEST_TAG
+            docker push $LATEST_TAG
+
+workflows:
+  deploy_gcr:
+    jobs:
+      - build
