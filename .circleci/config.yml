@@ -17,7 +17,7 @@ jobs:
     steps:
       - checkout
       - setup_remote_docker:
-          version: 18.06.0-ce
+          version: 20.10.14
       - gcp-cli/initialize
       - gcp-cli/install
       - run:
@@ -26,10 +26,6 @@ jobs:
             gcloud --quiet auth configure-docker
             
             docker build -t proxy .
-            today=$(date "+%Y%m%d%H%M%S")
-            TAG=gcr.io/api-circleci-test/proxy:${today}
-            docker tag proxy $TAG
-            docker push $TAG
             LATEST_TAG=gcr.io/api-circleci-test/proxy:latest
             docker tag proxy $LATEST_TAG
             docker push $LATEST_TAG
