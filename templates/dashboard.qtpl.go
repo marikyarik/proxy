@@ -37,6 +37,11 @@ func StreamDashboard(qw422016 *qt422016.Writer, data []byte) {
             font-size: 2rem;    
             text-align: center;
         }
+        textarea {
+            white-space: pre;
+            overflow-wrap: normal;
+            overflow-x: scroll;
+        }
     </style>
 </head>
 <body>
@@ -57,7 +62,7 @@ func StreamDashboard(qw422016 *qt422016.Writer, data []byte) {
       </div>
    </div>
    <div class="row mb-3 text-center justify-content-md-center" id="users">
-        <div class="col-md-3 d-flex align-items-center justify-content-lg-center" id="add-button">
+        <div class="col-md-6 d-flex align-items-center justify-content-lg-center" id="add-button">
             <button type="button" class="btn btn-primary btn-circle btn-xl" id="new-btn">+</button>
         </div>
    </div>
@@ -170,7 +175,7 @@ func StreamDashboard(qw422016 *qt422016.Writer, data []byte) {
 //line templates/dashboard.qtpl:1
 	qw422016.N().S("`")
 //line templates/dashboard.qtpl:1
-	qw422016.N().S(`<div class="col-md-3 user">
+	qw422016.N().S(`<div class="col-md-6 user">
                             <div class="card mb-4 rounded-3 border-primary" `)
 //line templates/dashboard.qtpl:1
 	qw422016.N().S("`")
@@ -368,39 +373,39 @@ func StreamDashboard(qw422016 *qt422016.Writer, data []byte) {
         }
     }
     app.init(`)
-//line templates/dashboard.qtpl:268
+//line templates/dashboard.qtpl:273
 	qw422016.N().Z(data)
-//line templates/dashboard.qtpl:268
+//line templates/dashboard.qtpl:273
 	qw422016.N().S(`);
 </script>
 </body>
 </html>
 `)
-//line templates/dashboard.qtpl:272
+//line templates/dashboard.qtpl:277
 }
 
-//line templates/dashboard.qtpl:272
+//line templates/dashboard.qtpl:277
 func WriteDashboard(qq422016 qtio422016.Writer, data []byte) {
-//line templates/dashboard.qtpl:272
+//line templates/dashboard.qtpl:277
 	qw422016 := qt422016.AcquireWriter(qq422016)
-//line templates/dashboard.qtpl:272
+//line templates/dashboard.qtpl:277
 	StreamDashboard(qw422016, data)
-//line templates/dashboard.qtpl:272
+//line templates/dashboard.qtpl:277
 	qt422016.ReleaseWriter(qw422016)
-//line templates/dashboard.qtpl:272
+//line templates/dashboard.qtpl:277
 }
 
-//line templates/dashboard.qtpl:272
+//line templates/dashboard.qtpl:277
 func Dashboard(data []byte) string {
-//line templates/dashboard.qtpl:272
+//line templates/dashboard.qtpl:277
 	qb422016 := qt422016.AcquireByteBuffer()
-//line templates/dashboard.qtpl:272
+//line templates/dashboard.qtpl:277
 	WriteDashboard(qb422016, data)
-//line templates/dashboard.qtpl:272
+//line templates/dashboard.qtpl:277
 	qs422016 := string(qb422016.B)
-//line templates/dashboard.qtpl:272
+//line templates/dashboard.qtpl:277
 	qt422016.ReleaseByteBuffer(qb422016)
-//line templates/dashboard.qtpl:272
+//line templates/dashboard.qtpl:277
 	return qs422016
-//line templates/dashboard.qtpl:272
+//line templates/dashboard.qtpl:277
 }

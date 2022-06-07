@@ -15,6 +15,11 @@
             font-size: 2rem;    
             text-align: center;
         }
+        textarea {
+            white-space: pre;
+            overflow-wrap: normal;
+            overflow-x: scroll;
+        }
     </style>
 </head>
 <body>
@@ -35,7 +40,7 @@
       </div>
    </div>
    <div class="row mb-3 text-center justify-content-md-center" id="users">
-        <div class="col-md-3 d-flex align-items-center justify-content-lg-center" id="add-button">
+        <div class="col-md-6 d-flex align-items-center justify-content-lg-center" id="add-button">
             <button type="button" class="btn btn-primary btn-circle btn-xl" id="new-btn">+</button>
         </div>
    </div>
@@ -136,7 +141,7 @@
             const json = user !== undefined ? JSON.stringify(user['headers'], undefined, 4) : '';
             const actionClass = user !== undefined ? 'activate-btn' : 'add-btn';
 
-            return `<div class="col-md-3 user">
+            return `<div class="col-md-6 user">
                             <div class="card mb-4 rounded-3 border-primary" ` + idAttr + `">
                                 <div class="card-header py-3 border-primary position-relative ` + className + `">
                                     <h4 class="my-0 fw-normal">` + name + `</h4>` + deleteBtn + `

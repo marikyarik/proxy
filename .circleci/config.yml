@@ -1,36 +1,47 @@
-version: 2.1
+version: 2
 
-orbs:
-  gcp-cli: circleci/gcp-cli@1.8.3
-
-executors:
-  default:
-    docker:
-      - image: google/cloud-sdk
-    working_directory: /app
-
-# Define the jobs we want to run for this project
 jobs:
   build:
-    executor:
-      name: default
+    docker:
+      - image: cimg/go:1.18
     steps:
       - checkout
-      - setup_remote_docker:
-          version: 20.10.14
-      - gcp-cli/initialize
-      - gcp-cli/install
+      - restore_cache:
+          keys:
+            - go-mod-v4-{{ checksum "go.sum" }}
+      - run: docker build -t proxy .
+      - save_cache:
+          key: go-mod-v4-{{ checksum "go.sum" }}
+          paths:
+            - "/go/pkg/mod"
+
+  deploy:
+    docker:
+      - image: google/cloud-sdk:latest
+    steps:
+      - checkout
+      - run:
+          name: Authorize GCloud Command Line Tool
+          command: |
+            echo $GCLOUD_SERVICE_KEY > ${HOME}/gcloud-service-key.json
+            
+            gcloud auth activate-service-account --key-file=${HOME}/gcloud-service-key.json
+            gcloud --quiet config set project $GOOGLE_PROJECT_ID
+            gcloud --quiet config set compute/zone $GOOGLE_COMPUTE_ZONE
       - run:
           name: Push image to GCR
           command: |
             gcloud --quiet auth configure-docker
             
-            docker build -t proxy .
             LATEST_TAG=gcr.io/api-circleci-test/proxy:latest
             docker tag proxy $LATEST_TAG
             docker push $LATEST_TAG
 
 workflows:
-  deploy_gcr:
+  version: 2
+  build-workflow:
     jobs:
       - build
+      - deploy:
+          requires:
+            - build
