@@ -3,7 +3,6 @@ version: 2
 jobs:
   build:
     docker:
-      - image: cimg/go:1.18
       - image: google/cloud-sdk:latest
     steps:
       - checkout
@@ -33,15 +32,6 @@ jobs:
             LATEST_TAG=gcr.io/api-circleci-test/proxy:latest
             docker tag proxy $LATEST_TAG
             docker push $LATEST_TAG
-
-  deploy:
-    docker:
-      - image: google/cloud-sdk:latest
-    steps:
-      - checkout
-      - setup_remote_docker:
-          docker_layer_caching: true
-
 
 workflows:
   version: 2
