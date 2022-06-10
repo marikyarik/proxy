@@ -1,7 +1,27 @@
 version: 2
 
 jobs:
-  build:
+  test:
+    docker:
+      - image: cimg/go:1.18
+    working_directory: /app
+    environment:
+      TEST_RESULTS: /tmp/test-results
+    steps:
+      - checkout
+      - run: mkdir -p $TEST_RESULTS
+      - run:
+          name: Run unit tests
+          command: |
+            PACKAGE_NAMES=$(go list ./... | circleci tests split --split-by=timings --timings-type=classname)
+            gotestsum --junitfile ${TEST_RESULTS}/gotestsum-report.xml -- $PACKAGE_NAMES
+      - store_artifacts:
+          path: /tmp/test-results
+          destination: raw-test-output
+      - store_test_results:
+          path: /tmp/test-results
+
+  build_and_deploy:
     docker:
       - image: google/cloud-sdk:latest
     steps:
@@ -39,4 +59,7 @@ workflows:
   version: 2
   build-workflow:
     jobs:
-      - build
+      - test
+      - build_and_deploy:
+          requires:
+              - test
