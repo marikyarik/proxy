@@ -11,7 +11,9 @@ jobs:
       - restore_cache:
           keys:
             - go-mod-v4-{{ checksum "go.sum" }}
-      - run: docker build -t proxy .
+      - run:
+          name: Build image
+          command: docker build -t proxy .
       - save_cache:
           key: go-mod-v4-{{ checksum "go.sum" }}
           paths:
