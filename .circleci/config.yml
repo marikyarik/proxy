@@ -20,9 +20,11 @@ jobs:
       - store_test_results:
           path: /tmp/test-results
 
-  build_and_deploy:
+  build_and_deploy: &build_and_deploy
     docker:
       - image: google/cloud-sdk:latest
+    environment:
+      DEPLOY_ENV: qa
     steps:
       - checkout
       - setup_remote_docker:
@@ -50,15 +52,51 @@ jobs:
           command: |
             gcloud --quiet auth configure-docker
                   
-            LATEST_TAG=gcr.io/api-circleci-test/proxy:latest
+            LATEST_TAG=gcr.io/api-circleci-test/proxy:${DEPLOY_ENV}
             docker tag proxy $LATEST_TAG
             docker push $LATEST_TAG
+
+  deploy-qa:
+    <<: *build_and_deploy
+    environment:
+      DEPLOY_ENV: qa
+
+  deploy-pre-prod:
+    <<: *build_and_deploy
+    environment:
+      DEPLOY_ENV: pre-prod
+
+  deploy-prod:
+    <<: *build_and_deploy
+    environment:
+      DEPLOY_ENV: prod
 
 workflows:
   version: 2
   build-workflow:
     jobs:
       - test
-      - build_and_deploy:
+
+      - hold-qa:
+          type: approval
           requires:
-              - test
+            - test
+      - deploy-qa:
+          requires:
+            - hold-qa
+
+      - hold-pre-prod:
+          type: approval
+          requires:
+            - test
+      - deploy-pre-prod:
+          requires:
+            - hold-pre-prod
+
+      - hold-prod:
+          type: approval
+          requires:
+            - test
+      - deploy-prod:
+          requires:
+            - hold-prod
